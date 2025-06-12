@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Link2, ImageIcon, FileText, Eye, Edit, Trash2, Calendar } from "lucide-react"
 import { formatInTimeZone } from "date-fns-tz"
 import { InformationItem as InfoItem } from "@/lib/types";
+import Image from "next/image";
 
 interface InfoCardProps {
   item: InfoItem; // item 的型別現在是從 @/lib/types 匯入的 InformationItem
@@ -71,8 +72,13 @@ export function InfoCard({ item, onDelete }: InfoCardProps) {
 
         {/* Image Preview - For type 'image' only */}
         {item.type === 'image' && item.original_content && (
-          <div className="mt-2">
-            <img src={item.original_content} alt={item.title} className="max-w-full h-auto rounded" />
+          <div className="mt-2 relative aspect-video"> {/* Add relative positioning and aspect ratio for proper layout */}
+            <Image
+              src={item.original_content}
+              alt={item.title}
+              fill // Use fill to make the image responsive within the parent
+              className="object-cover rounded" // Add object-cover for better image scaling
+            />
           </div>
         )}
       </CardContent>

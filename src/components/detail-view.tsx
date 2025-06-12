@@ -35,6 +35,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 interface InfoItem {
   id: string
@@ -196,9 +197,11 @@ export function DetailView({ item }: DetailViewProps) {
                 {/* Thumbnail for images */}
                 {item.type === "image" && item.thumbnail && (
                   <div className="w-full">
-                    <img
+                    <Image
                       src={item.thumbnail || "/placeholder.svg"}
                       alt={item.title}
+                      width={800} // Add appropriate width
+                      height={600} // Add appropriate height
                       className="w-full max-w-2xl mx-auto rounded-lg border bg-muted"
                     />
                   </div>
