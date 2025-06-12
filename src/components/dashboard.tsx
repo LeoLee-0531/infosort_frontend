@@ -19,9 +19,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Search, Filter, CalendarIcon, Link2, ImageIcon, FileText, X, User, RefreshCw } from "lucide-react"
 import { format } from "date-fns"
 import { InfoCard } from "@/components/info-card"
-import { mockData } from "@/lib/mock-data"
+import { InformationItem } from "@/lib/types"; // 匯入 InformationItem
 
-export function Dashboard() {
+interface DashboardProps { // 定義 props 的介面
+  items: InformationItem[];
+}
+
+export function Dashboard({ items }: DashboardProps) { // 接收 items prop
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState("all")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -33,18 +37,19 @@ export function Dashboard() {
 
   // Mock data for demonstration
   const allTags = ["技術", "新聞", "教育", "娛樂", "工作", "健康", "旅遊", "美食", "科技", "設計"]
-  const infoItems = mockData
+  // const infoItems = mockData // 使用傳入的 items 替換 mockData
+  const infoItems = items;
 
   const filteredItems = infoItems.filter((item) => {
     const matchesSearch =
       searchQuery === "" ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      (item.summary && item.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      item.tags.some((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const matchesType = selectedType === "all" || item.type === selectedType
 
-    const matchesTags = selectedTags.length === 0 || selectedTags.some((tag) => item.tags.includes(tag))
+    const matchesTags = selectedTags.length === 0 || item.tags.some(itemTag => selectedTags.includes(itemTag.name))
 
     // Date range filtering logic (assuming item.date is a Date object or string that can be parsed)
     // This part needs to be implemented if date filtering is required.
@@ -127,20 +132,20 @@ export function Dashboard() {
               <SelectValue placeholder="資訊類型" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部類型</SelectItem>
-              <SelectItem value="link">
+              <SelectItem key="all" value="all">全部類型</SelectItem>
+              <SelectItem key="link" value="link">
                 <div className="flex items-center gap-2">
                   <Link2 className="h-4 w-4" />
                   連結
                 </div>
               </SelectItem>
-              <SelectItem value="image">
+              <SelectItem key="image" value="image">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-4 w-4" />
                   圖片
                 </div>
               </SelectItem>
-              <SelectItem value="document">
+              <SelectItem key="document" value="document">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   文件
@@ -238,7 +243,7 @@ export function Dashboard() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((item) => (
-              <InfoCard key={item.id} item={item} onDelete={() => handleDelete(item.id)} />
+              <InfoCard key={item._id} item={item} onDelete={() => handleDelete(item._id)} />
             ))}
           </div>
         )}
