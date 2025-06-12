@@ -8,7 +8,7 @@ export default function Page() {
       <div className="flex h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-hidden">
-          <Dashboard />
+          <Dashboard items={[]} />
         </main>
       </div>
     </SidebarProvider>
