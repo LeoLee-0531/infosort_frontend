@@ -1,26 +1,26 @@
-// src/lib/types.ts (或 src/types/index.ts)
+// src/lib/types.ts
 
-// 根據您的資料庫 schema
+// 根據您的資料庫 schema (已調整為符合 API 範例的駝峰式命名)
 export interface InformationItem {
-  _id: string; // 資料庫使用 _id
-  user_id: string;
-  type: 'link' | 'image' | 'document';
-  original_content: string; // 原始連結、檔案儲存路徑或文字內容
+  id: string;
   title: string;
-  summary?: string; // LLM 生成的摘要，API 有回傳
-  created_at: Date; // 在前端可以轉換成 Date 物件
-  updated_at: Date; // 在前端可以轉換成 Date 物件
-  tags: Tag[]; // 關聯的標籤
+  description?: string;
+  type: 'link' | 'image' | 'document'; // 保持原有类型，API 範例中 type: "link"
+  originalContent: string;
+  userId: string;
+  createdAt: string; // API 回傳字串
+  updatedAt: string; // API 回傳字串
+  tags: Tag[]; // API 範例中為空陣列 []
 }
 
 export interface Tag {
-  _id: string; // 資料庫使用 _id
+  id: string; // 假設 Tag 也有 id
   name: string;
-  description?: string;
-  created_at: Date;
-  updated_at: Date;
+  // description?: string; // API 範例中 Tag 沒有 description
+  // createdAt: string; // API 範例中 Tag 沒有 createdAt
+  // updatedAt: string; // API 範例中 Tag 沒有 updatedAt
 }
 
 // 注意：ApiInformationItem 和 ApiTag 已在 api.ts 中定義，它們處理 API 回傳的原始字串日期和 _id
 // 在組件中，我們可能希望將這些轉換為更易用的格式，例如 Date 物件和 id (如果前端習慣用 id)
-// 但為了簡化，我們先直接使用 ApiInformationItem 和 ApiTag 的結構，並注意 _id 和字串日期。
+// 此處型別已調整為直接反映 API 範例的駝峰式命名和字串日期。

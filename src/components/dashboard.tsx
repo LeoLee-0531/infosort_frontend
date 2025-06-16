@@ -19,7 +19,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Search, Filter, CalendarIcon, Link2, ImageIcon, FileText, X, User, RefreshCw } from "lucide-react"
 import { format } from "date-fns"
 import { InfoCard } from "@/components/info-card"
-import { InformationItem } from "@/lib/types"; // 匯入 InformationItem
+import { InformationItem, Tag } from "@/lib/types"; // 匯入 InformationItem 和 Tag
 
 interface DashboardProps { // 定義 props 的介面
   items: InformationItem[];
@@ -44,12 +44,14 @@ export function Dashboard({ items }: DashboardProps) { // 接收 items prop
     const matchesSearch =
       searchQuery === "" ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.summary && item.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      item.tags.some((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      // 使用 item.tags 替換 item.tagAssociations
+      (item.tags && item.tags.some((tag: Tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())))
 
     const matchesType = selectedType === "all" || item.type === selectedType
 
-    const matchesTags = selectedTags.length === 0 || item.tags.some(itemTag => selectedTags.includes(itemTag.name))
+    // 使用 item.tags 替換 item.tagAssociations
+    const matchesTags = selectedTags.length === 0 || (item.tags && item.tags.some(itemTag => selectedTags.includes(itemTag.name)))
 
     // Date range filtering logic (assuming item.date is a Date object or string that can be parsed)
     // This part needs to be implemented if date filtering is required.
@@ -243,7 +245,7 @@ export function Dashboard({ items }: DashboardProps) { // 接收 items prop
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((item) => (
-              <InfoCard key={item._id} item={item} onDelete={() => handleDelete(item._id)} />
+              <InfoCard key={item.id} item={item} onDelete={() => handleDelete(item.id)} />
             ))}
           </div>
         )}
