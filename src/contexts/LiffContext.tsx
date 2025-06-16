@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, FC } from 'r
 import liff, { Liff } from '@line/liff';
 import { Profile } from '@liff/get-profile'; // 引入 Profile 的型別
 import { InformationItem } from '@/lib/types'; // 匯入 InformationItem
+import LoadingSpinner from '@/components/ui/loading-spinner'; // 匯入 LoadingSpinner 元件
 
 // 定義 Context 要提供的值的型別
 interface LiffContextType {
@@ -11,6 +12,7 @@ interface LiffContextType {
   profile: Profile | null;
   error: string;
   isLoggedIn: boolean;
+  isLoading: boolean; // 新增 isLoading 狀態
   items: InformationItem[]; // 新增 items 狀態
   fetchItems: () => Promise<void>; // 新增 fetchItems 函數以供外部調用刷新
 }
@@ -21,6 +23,7 @@ const LiffContext = createContext<LiffContextType>({
   profile: null,
   error: '',
   isLoggedIn: false,
+  isLoading: true, // 初始化 isLoading
   items: [], // 初始化 items
   fetchItems: async () => { }, // 初始化 fetchItems
 });
@@ -31,9 +34,11 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string>('');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // 新增 isLoading 狀態管理
   const [items, setItems] = useState<InformationItem[]>([]); // 新增 items 狀態管理
 
   const fetchItemsInternal = async (token: string, userId: string) => {
+    setIsLoading(true); // 開始獲取資料時，設置 isLoading 為 true
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       if (!apiBaseUrl) {
@@ -61,6 +66,8 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
       } else {
         setError(prevError => prevError ? `${prevError}; ${String(e)}` : String(e));
       }
+    } finally {
+      setIsLoading(false); // 資料獲取完成或失敗後，設置 isLoading 為 false
     }
   };
 
@@ -78,6 +85,7 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     const initializeLiff = async () => {
+      setIsLoading(true); // 開始初始化 LIFF 時，設置 isLoading 為 true
       try {
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) {
@@ -113,6 +121,11 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
         } else {
           setError(String(e));
         }
+      } finally {
+        // 不論成功或失敗，初始化完成後都設置 isLoading 為 false
+        // 但如果需要等待 fetchItemsInternal 完成，則 fetchItemsInternal 內部會處理
+        // 此處 setIsLoading(false) 可能過早，取決於 fetchItemsInternal 是否總是最後執行
+        // 考慮到 fetchItemsInternal 也有自己的 setIsLoading，這裡可以移除或調整
       }
     };
 
@@ -121,6 +134,7 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   // 修改 verifyWithBackend 以接收 userProfile 參數
   const verifyWithBackend = async (idToken: string, currentUserProfile: Profile) => {
+    // setIsLoading(true); // 如果驗證也需要 loading 狀態，可以在此設置
     console.log("NEXT_PUBLIC_API_BASE_URL from env:", process.env.NEXT_PUBLIC_API_BASE_URL);
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -168,11 +182,17 @@ export const LiffProvider: FC<{ children: ReactNode }> = ({ children }) => {
       } else {
         setError(String(e)); // Handle cases where e might not be an Error instance
       }
+    } finally {
+      // setIsLoading(false); // 如果驗證也需要 loading 狀態，在此解除
     }
   };
 
+  if (isLoading) {
+    return <LoadingSpinner />; // 顯示 LoadingSpinner 元件
+  }
+
   return (
-    <LiffContext.Provider value={{ liffObject, profile, error, isLoggedIn, items, fetchItems }}>
+    <LiffContext.Provider value={{ liffObject, profile, error, isLoggedIn, isLoading, items, fetchItems }}>
       {children}
     </LiffContext.Provider>
   );

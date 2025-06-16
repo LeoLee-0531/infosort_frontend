@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"; // Import Image component
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -20,12 +21,14 @@ import { Search, Filter, CalendarIcon, Link2, ImageIcon, FileText, X, User, Refr
 import { format } from "date-fns"
 import { InfoCard } from "@/components/info-card"
 import { InformationItem, Tag } from "@/lib/types"; // 匯入 InformationItem 和 Tag
+import { useLiff } from "@/contexts/LiffContext"; // Import useLiff hook
 
 interface DashboardProps { // 定義 props 的介面
   items: InformationItem[];
 }
 
 export function Dashboard({ items }: DashboardProps) { // 接收 items prop
+  const { profile } = useLiff(); // Get profile from LiffContext
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState("all")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -99,10 +102,22 @@ export function Dashboard({ items }: DashboardProps) { // 接收 items prop
               <RefreshCw className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                <User className="h-4 w-4" />
-              </div>
-              <span className="text-sm text-muted-foreground">使用者</span>
+              {profile && profile.pictureUrl ? (
+                <Image
+                  src={profile.pictureUrl}
+                  alt={profile.displayName || "User"}
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-full"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                  <User className="h-4 w-4" />
+                </div>
+              )}
+              <span className="text-sm text-muted-foreground">
+                {profile ? profile.displayName : "使用者"}
+              </span>
             </div>
           </div>
         </div>
