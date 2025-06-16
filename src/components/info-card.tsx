@@ -46,7 +46,13 @@ export function InfoCard({ item, onDelete }: InfoCardProps) {
     ? formatInTimeZone(createdAtDate, 'UTC', 'yyyy/MM/dd HH:mm')
     : "無效日期";
 
-  const displayTags = Array.isArray(item.tags) ? item.tags : [];
+  const displayTags: Tag[] = Array.isArray(item.tags)
+    ? item.tags.map((tag, index) =>
+      typeof tag === 'string'
+        ? { id: `tag-${index}-${item.id}`, name: tag }
+        : tag
+    )
+    : [];
 
   return (
     <Card className="flex flex-col h-full hover:shadow-md transition-shadow">
